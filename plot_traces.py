@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-import grand.io.root_trees as rt
+import grand.dataio.root_trees as rt
 
 '''
 ## PLOTTING TRACES OF GRAND DATA FILES #
@@ -44,8 +44,8 @@ parser.add_argument('--NC',
                     type=int,
                     help='Specifies the number of channels to be displayed. The NC first channels will be displayed.\
                     If not specified, the script will find channels with datas')
-      
-                    
+
+
 options = parser.parse_args()
 
 
@@ -70,10 +70,10 @@ tadc.get_entry(0)
 print(tadc)
 
 
-## If not entered by user, determines Nchannel the number of channels 
-## containing datas. 
+## If not entered by user, determines Nchannel the number of channels
+## containing datas.
 ## Determines which channels are enabled into 'channels' list
-## To do that, we use tadc.adc_enabled_channels_ch[0] that contains, 
+## To do that, we use tadc.adc_enabled_channels_ch[0] that contains,
 ## a boolean reflecting the enabling of each channel
 #######################################################################
 
@@ -92,7 +92,7 @@ else:
         print('The first enabled channel is %s' %([ChannelNames[channels[0]]]) )
     else:
         print('The first %s enabled channels are %s' %(Nchannels,[ChannelNames[channels[k]] for k in range(Nchannels)]) )
-    
+
 
 ## Plot the traces
 ##################
@@ -117,12 +117,12 @@ channels = [k for k in range(len(tadc.adc_enabled_channels_ch[0])) if tadc.adc_e
 for i in range(Nchannels):
     # Formating 'trace' list length to match number of channels
     trace.append([])
-    
+
     # Let's trick Python in case we only one channel to subscript the plot axes :
     # in case of a plot, ax is a scalar but in case of a subplot it's a list - so
     # let us make a list of that scalar if only 1 channel
     if Nchannels > 1:
-        axs = ax           
+        axs = ax
     else:
         axs = [ax]
 
@@ -130,20 +130,20 @@ for i in range(Nchannels):
     splt, = axs[i].plot(tadc.trace_ch[0][channels[i]],label=labels[i],color=colors[i])
     subplots.append(splt)
     axs[i].legend(frameon=True)
-            
+
 # Set axis labels
 axs[Nchannels-1].set_xlabel('Sample number',fontsize=20)
 axs[0].set_ylabel('ADC counts',fontsize=20)
-    
+
 for entry in range(StartEntry,tadc.get_number_of_entries()):
         # Load the entry in the tree
         tadc.get_entry(entry)
         print(tadc)
-                
+
         # Set figure title
         title = r'File: {:} | Entry: {:} | Event index: {:} | DU: {:}'
         title = title.format(data_file,entry,tadc.event_id[0],tadc.du_id[0])
-        
+
         for i in range(Nchannels):
             # Get the traces
             trace[i] = tadc.trace_ch[0][channels[i]]
@@ -154,8 +154,8 @@ for entry in range(StartEntry,tadc.get_number_of_entries()):
             # Draw figure and flush events for next iterations
             fig.canvas.draw()
             fig.canvas.flush_events()
-                
-        print('Entry %s' %(entry))       
+
+        print('Entry %s' %(entry))
         if TimeSleep == 666:       # yeah ikr ... but allows some quiet time with our victim
             input('Press Enter\n')
             break
