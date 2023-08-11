@@ -229,57 +229,44 @@ labch = ["X channel", "Y channel", "Z channel"]
 colch = ["blue","orange","green"]
 
 plt.rcParams["date.autoformatter.minute"] = "%d - %H:%M"
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-plt.gca().xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M'))
-plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-plt.gca().yaxis.set_minor_formatter(mdates.DateFormatter('%H:%M'))
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+# plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+# plt.gca().xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M'))
+# plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+# plt.gca().yaxis.set_minor_formatter(mdates.DateFormatter('%H:%M'))
+# plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+# plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+
+tit = runpath + "- DU" + str(uid)
+
+## Amplitude histos
+plt.figure(1)
+nbins = 50
+plt.figure(1)
+for j in range(nch):
+    alldata = trace[:,j,:].flatten()
+    print("Std dev Channel",j,":",np.std(alldata))
+    plt.subplot(311+j)
+    plt.hist(alldata,nbins,label=labch[j], color = "white", ec=colch[j], lw=3)
+    plt.yscale('log')
+    plt.grid()
+    plt.legend(loc='best')
+    if j==nch-1:
+        plt.xlabel('All amplitudes (LSB)')
+plt.suptitle(tit)
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+f = "hist_"+str(runid)+"_DU"+str(uid)
+plt.savefig(f)
 
 
-if 1:
-    plt.figure(1)
-    nbins = 50
-    plt.figure(1)
-    for j in range(nch):
-        alldata = trace[:,j,:].flatten()
-        print("Std dev Channel",j,":",np.std(alldata))
-        plt.subplot(311+j)
-        plt.hist(alldata,nbins,label=labch[j], color = "white", ec=colch[j], lw=3)
-        plt.yscale('log')
-        plt.grid()
-        plt.legend(loc='best')
-        if j==nch-1:
-            plt.xlabel('All amplitudes (LSB)')
-    plt.subplot(311)
-    tit = runpath + "- DU" + str(uid)
-    plt.title(tit)
-    f = "hist_"+str(runid)+"_DU"+str(uid)
-    plt.savefig(f)
-
-
-if 1:
-    gal = np.loadtxt("galaxyrfftX18h.txt",delimiter=',')
-    sel = gal[:,0]<=250
-    freq_gal = gal[sel,0]
-    sig_galX18 = gal[sel,1]
-    # gal = np.loadtxt("galaxyrfftX0h.txt",delimiter=',')
-    # sel = gal[:,0]<=250
-    # sig_galX0 = gal[sel,1]
-    # gal = np.loadtxt("galaxyrfftX7h.txt",delimiter=',')
-    # sel = gal[:,0]<=250
-    # sig_galX7 = gal[sel,1]
-    # gal = np.loadtxt("galaxyrfftY18h.txt",delimiter=',')
-    # sel = gal[:,0]<=250
-    # sig_galY18 = gal[sel,1]
-    # gal = np.loadtxt("galaxyrfftZ18h.txt",delimiter=',')
-    # sel = gal[:,0]<=250
-    # sig_galZ18 = gal[sel,1]
-
-#u = "(V$^2$/" + f'{fsamp/1e6/ib0:4.2f}' + "MHz)"
+## FFT
+plt.figure(2)
+gal = np.loadtxt("galaxyrfftX18h.txt",delimiter=',')
+sel = gal[:,0]<=250
+freq_gal = gal[sel,0]
+sig_galX18 = gal[sel,1]
 u = "(V$^2$/MHz)"
 lab = ["X channel","Y channel","Z channel"]
-plt.figure(2)
 for j in range(nch):
     pfft[j,0:10] = pfft[j,10]
     #plt.subplot(311+i)
@@ -287,17 +274,17 @@ for j in range(nch):
     plt.xlim(0,max(freqx))
     plt.ylabel('FFT' + u + "(VGA corrected)")
 
-plt.plot(freq_gal,sig_galX18,label="Galaxy - X@18hLST (obs)")
-#plt.plot(freq_gal,sig_galY18,label="Galaxy - Y@18hLST (sim)")
-#plt.plot(freq_gal,sig_galZ18,label="Galaxy - Z@18hLST (sim)")
+plt.semilogy(freq_gal,sig_galX18,label="Galaxy - X@18hLST (obs)")
 plt.xlabel('Frequency (MHz)')
 plt.legend(loc="best")
-plt.title(tit)
+plt.suptitle(tit)
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 f = "FFT_"+str(runid)+"_DU"+str(uid)
 plt.savefig(f)
 print("Std dev from FFT @ DAQ level:", np.sqrt(2*np.sum(mfft,axis=1))*gainlin/kadc)
 
-
+## GPS plots
 plt.figure(3)
 plt.subplot(221)
 plt.plot(gpstime,'+-', label='GPS time')
@@ -314,42 +301,21 @@ plt.ylabel('Date (UTC)')
 plt.subplot(223)
 plt.hist(dgps,100)
 plt.xlabel("$\Delta$ t GPS (s)")
-#plt.plot(dt,'+-', label='GPS time')
-#plt.plot(dts,'+-', label='GPS second')
-#plt.xlabel('Index')
-#plt.ylabel('Date')
-#plt.legend(loc='best')
 plt.subplot(224)
 plt.plot(tmn[validt],dt[validt],'+-', label='GPS time (valid)')
 plt.plot(tmn[validt],dts[validt],'+-', label='GPS second (valid)')
 plt.legend(loc='best')
 plt.xlabel('Run duration (min)')
 plt.ylabel('Date (UTC)')
+plt.suptitle(tit)
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 f = "GPS_"+str(runid)+"_DU"+str(uid)
 plt.savefig(f)
 
-plt.figure(6)
+## Time variation plots
+plt.figure(4)
 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%HH:%mm'))
-plt.subplot(222)
-plt.plot(battery,'+',label='Battery level')
-plt.legend(loc='best')
-plt.xlabel('Index')
-plt.ylabel('Voltage (V)')
-plt.grid()
-plt.subplot(224)
-plt.plot(dt[validt],battery[validt],'+',label='Battery level')
-plt.legend(loc='best')
-plt.xlabel('Time (UTC)')
-plt.ylabel('Voltage (V)')
-plt.grid()
-plt.subplot(223)
-for j in range(nch):
-    plt.plot(dt[validt],sig[validt,j],'+',label=labch[j])
-plt.legend(loc='best')
-plt.xlabel('Date (UTC)')
-plt.ylabel('Std dev (LSB)')
-plt.xlim(min(dt[validt]),max(dt[validt]))
-plt.grid()
 plt.subplot(221)
 for j in range(nch):
     plt.plot(sig[:,j],'+',label=labch[j])
@@ -357,40 +323,34 @@ plt.legend(loc='best')
 plt.xlabel('Index')
 plt.ylabel('Std dev (LSB)')
 plt.grid()
-plt.title(tit)
+plt.subplot(222)
+plt.plot(battery,'+',label='Battery level')
+plt.legend(loc='best')
+plt.xlabel('Index')
+plt.ylabel('Voltage (V)')
+plt.grid()
+plt.subplot(223)
+for j in range(nch):
+    plt.plot(dt[validt],sig[validt,j],'+',label=labch[j])
+plt.xticks(rotation=45)
+plt.legend(loc='best')
+plt.xlabel('Date (UTC)')
+plt.ylabel('Std dev (LSB)')
+plt.xlim(min(dt[validt]),max(dt[validt]))
+plt.grid()
+plt.subplot(224)
+plt.plot(dt[validt],battery[validt],'+',label='Battery level')
+plt.xticks(rotation=45)
+#plt.locator_params(axis='both', nbins=4) # myAnalysisAuger.py:344: UserWarning: 'set_params()' not defined for locator of type <class 'matplotlib.dates.AutoDateLocator'> plt.locator_params(axis='both', nbins=4)
+
+plt.legend(loc='best')
+plt.xlabel('Date (UTC)')
+plt.ylabel('Voltage (V)')
+plt.grid()
+plt.suptitle(tit)
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 f = "sig_"+str(runid)+"_DU"+str(uid)
 plt.savefig(f)
 
 plt.show()
-
-if 0:
-    for i in range(3):
-        plt.figure(10)
-        #plt.subplot(311+i)
-        plt.semilogy(freqx,pfft[i],label=lab[i])
-        plt.xlim(0,max(freqx))
-        plt.ylabel('FFT' + u + "(VGA corrected)")
-        if 0:
-            if i == 0:
-                plt.semilogy(freq_gal,sig_galX7,label="Simulated galaxy - X@7hLST (min)")
-                plt.semilogy(freq_gal,sig_galX0,label="Simulated galaxy - X@0hLST (max)")
-            if i == 1:
-                plt.semilogy(freq_gal,sig_galY18,label="Galaxy - Y@18hLST (sim)")
-            if i == 2:
-                plt.semilogy(freq_gal,sig_galZ18,label="Galaxy - Z@18hLST (sim)")
-        plt.grid()
-        plt.xlabel('Frequency (MHz)')
-        plt.legend(loc="best")
-        plt.title(tit)
-        plt.figure(10)
-        plt.savefig(tit)
-
-    plt.figure()
-    for i in range(3):
-        plt.plot(tmn,sig[:,i],".",label=lab[i])
-    plt.legend(loc="best")
-    plt.ylabel('Std Dev (LSB)')
-    plt.xlabel('Time (mn)')
-    tit = runpath + "-DU" + str(uid)
-    plt.title(tit)
-    plt.show()
