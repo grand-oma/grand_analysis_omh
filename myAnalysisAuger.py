@@ -55,8 +55,8 @@ trun = df.trun
 tadc = df.tadc
 #tadc.get_entry(0)
 #print(tadc)
-
 trawv = df.trawvoltage
+#trawv.get_entry(0)
 listevt=trawv.get_list_of_events()  # (evt number, run number)
 nevents = len(listevt)
 if nshow>nevents:
@@ -78,6 +78,7 @@ channels = [k for k in range(len(tadc.adc_enabled_channels_ch[0])) if tadc.adc_e
 nch = len(channels)
 # Assume same length for all channels
 ib = tadc.adc_samples_count_ch[0][1] # Problem with channel 0?? = 192
+print("Traces lengths:",tadc.get_traces_lengths()) # Problem with channel 0?? = 192
 #evt.adc_samples_count_channel0[0]
 #ib1=evt.adc_samples_count_channel1[0]
 #ib2=evt.adc_samples_count_channel2[0]
@@ -121,9 +122,13 @@ sig=[]
 gpstime=[]
 sgps=[]
 mfft = []
+battery = []
 nev = 0
 for i in range(nevents):
     tadc.get_event(listevt[i][0],listevt[i][1])
+    trawv.get_event(listevt[i][0],listevt[i][1])
+    #tadc.get_entry(listevt[i][0])
+    #trawv.get_entry(listevt[i][0])
 
     #print("DU IDs in event",i,":",tadc.du_id)
     ind = np.argwhere( np.array(tadc.du_id) == uid)
@@ -146,6 +151,7 @@ for i in range(nevents):
     gpstime.append(tadc.gps_time[ind])
     sgps.append(tadc.du_seconds[ind])
     sig.append(np.std(trace[i,:,:],axis=1))
+    battery.append(trawv.battery_level[ind])
 
     # Analyse traces
     ntrigsx, freqx, fftx = singleTraceProcess(trace[i][0])
@@ -179,10 +185,14 @@ for i in range(nevents):
 print('######')
 print('######')
 gpstime= np.array(gpstime)
+inds = np.argsort(gpstime, axis=0)
+gpstime = gpstime[inds]
 dgps = np.diff(gpstime)
 sgps= np.array(sgps)
+sgps = sgps[inds]
 sig = np.array(sig)
-sgps = np.array(sgps)
+sig = sig[inds]
+
 validt = (gpstime>0) & (gpstime < 1692000000)
 print(sum(validt),len(validt),nev)
 tmn = (gpstime-gpstime[0])/60
@@ -193,6 +203,7 @@ for i in range(nev):
   dts.append(datetime.datetime.fromtimestamp(sgps[i]))
 dt = np.array(dt)
 dts = np.array(dts)
+battery = np.array(battery)
 
 print("Nb of events for DU",uid,":",nev)
 mfft = mfft/nev  # mean fft
@@ -216,6 +227,16 @@ print("Mean = ", ntrigs/nevents,"pulses/trace, Rate = ",trig_rate,"Hz")
 
 labch = ["X channel", "Y channel", "Z channel"]
 colch = ["blue","orange","green"]
+
+plt.rcParams["date.autoformatter.minute"] = "%d - %H:%M"
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+plt.gca().xaxis.set_minor_formatter(mdates.DateFormatter('%H:%M'))
+plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+plt.gca().yaxis.set_minor_formatter(mdates.DateFormatter('%H:%M'))
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+plt.gca().yaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+
+
 if 1:
     plt.figure(1)
     nbins = 50
@@ -223,7 +244,6 @@ if 1:
     for j in range(nch):
         alldata = trace[:,j,:].flatten()
         print("Std dev Channel",j,":",np.std(alldata))
-
         plt.subplot(311+j)
         plt.hist(alldata,nbins,label=labch[j], color = "white", ec=colch[j], lw=3)
         plt.yscale('log')
@@ -279,7 +299,6 @@ print("Std dev from FFT @ DAQ level:", np.sqrt(2*np.sum(mfft,axis=1))*gainlin/ka
 
 
 plt.figure(3)
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%MM-%dd %HH:%mm'))
 plt.subplot(221)
 plt.plot(gpstime,'+-', label='GPS time')
 plt.plot(sgps,'+-', label='GPS second')
@@ -291,7 +310,7 @@ plt.plot(dt[validt],'+-', label='GPS time (valid)')
 plt.plot(dts[validt],'+-', label='GPS second (valid)')
 plt.legend(loc='best')
 plt.xlabel('Index')
-plt.ylabel('Date')
+plt.ylabel('Date (UTC)')
 plt.subplot(223)
 plt.hist(dgps,100)
 plt.xlabel("$\Delta$ t GPS (s)")
@@ -305,50 +324,38 @@ plt.plot(tmn[validt],dt[validt],'+-', label='GPS time (valid)')
 plt.plot(tmn[validt],dts[validt],'+-', label='GPS second (valid)')
 plt.legend(loc='best')
 plt.xlabel('Run duration (min)')
-plt.ylabel('Date')
+plt.ylabel('Date (UTC)')
 f = "GPS_"+str(runid)+"_DU"+str(uid)
 plt.savefig(f)
 
-
-# plt.figure(4)
-# plt.title("GPS 1")
-# plt.subplot(211)
-# plt.plot(gpstime[validt],'+-', label='GPS time')
-# plt.plot(sgps[validt],'+-', label='GPS second')
-# plt.xlabel('Index')
-# plt.ylabel('Unix time')
-# plt.legend(loc='best')
-# plt.subplot(212)
-# plt.plot(tmn[validt],gpstime[validt],'+-', label='GPS time')
-# plt.plot(tmn[validt],sgps[validt],'+-', label='GPS second')
-# plt.xlabel('Run duration (mn)')
-# plt.ylabel('Unix time')
-# plt.legend(loc='best')
-#
-# plt.figure(5)
-# plt.title("GPS 2")
-# plt.plot(tmn[validt],dt[validt],'+',label='GPS time')
-# plt.plot(tmn[validt],dts[validt],'+', label='GPS second')
-# plt.xlabel('Run duration (mn)')
-# plt.ylabel('Date')
-# plt.legend(loc='best')
-
 plt.figure(6)
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%MM-%dd %HH:%mm'))
-plt.subplot(212)
-for j in range(nch):
-    plt.plot(sig[:,j],label=labch[j])
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%HH:%mm'))
+plt.subplot(222)
+plt.plot(battery,'+',label='Battery level')
 plt.legend(loc='best')
 plt.xlabel('Index')
-plt.ylabel('Std dev (LSB)')
+plt.ylabel('Voltage (V)')
 plt.grid()
-plt.subplot(211)
+plt.subplot(224)
+plt.plot(dt[validt],battery[validt],'+',label='Battery level')
+plt.legend(loc='best')
+plt.xlabel('Time (UTC)')
+plt.ylabel('Voltage (V)')
+plt.grid()
+plt.subplot(223)
 for j in range(nch):
-    plt.plot(dt[validt],sig[validt,j],label=labch[j])
+    plt.plot(dt[validt],sig[validt,j],'+',label=labch[j])
 plt.legend(loc='best')
 plt.xlabel('Date (UTC)')
 plt.ylabel('Std dev (LSB)')
 plt.xlim(min(dt[validt]),max(dt[validt]))
+plt.grid()
+plt.subplot(221)
+for j in range(nch):
+    plt.plot(sig[:,j],'+',label=labch[j])
+plt.legend(loc='best')
+plt.xlabel('Index')
+plt.ylabel('Std dev (LSB)')
 plt.grid()
 plt.title(tit)
 f = "sig_"+str(runid)+"_DU"+str(uid)
