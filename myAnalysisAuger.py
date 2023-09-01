@@ -413,6 +413,15 @@ def buildStats(uid, fn):
     temp = temp[indn]
     battery = battery[indn]
     sig = sig[indn,:]
+    # Remove non valid time infos
+    deltat = np.insert(np.diff(time), 0, 0., axis=0)  # How ugly is this?
+    validt = (time>1690000000) & (time < 1700000000) & (deltat>=0)  # Valid GPS time
+    nonvalidgps = nev- sum(validt)
+    time = time[validt]
+    temp = temp[validt]
+    battery = battery[validt]
+    sig = sig[validt,:]
+
     # Computes various stats
     nhot = np.sum(temp>55) # T over 55°C
     nlowv = np.sum(battery<12) # FEB battery below 12V
@@ -425,10 +434,6 @@ def buildStats(uid, fn):
         nlow[j] = sum(sig[:,j]<10)  # Std dev below 5LSB
         nhigh[j] = sum(sig[:,j]>100) # Std dev abov 100LSB
 
-    deltat = np.insert(np.diff(time), 0, 0., axis=0)  # How ugly is this?
-    validt = (time>1690000000) & (time < 1700000000) & deltat>=0  # Valid GPS time
-    nonvalidgps = nev- sum(validt)
-    time = time[validt]   #Consider valid GPS time only
     if 0:  # Check plots
         deltat = np.diff(time)
         plt.figure(1)
@@ -437,17 +442,18 @@ def buildStats(uid, fn):
         plt.subplot(212)
         plt.hist(deltat,1000)
         plt.show()
+
     if len(time)>0:
         gpsmin = time[0]  # First event
         gpsmax = time[-1] # Last event
         datemin = datetime.datetime.utcfromtimestamp(gpsmin).strftime('%Y-%m-%d %H:%M:%S')
         datemax = datetime.datetime.utcfromtimestamp(gpsmax).strftime('%Y-%m-%d %H:%M:%S')
         duration = gpsmax-gpsmin
+        return(runid,subid,nhot,nlowv,nvlowv,nvvlowv,uid,nentries,nev,duplicates,nonvalidgps,datemin,datemax,gpsmin,gpsmax,duration,meansig,nlow.T[0],nhigh.T[0])
     else: # No valid GPS time
         print("Wrong GPS info. Aborting buildStats.")
         return np.zeros((19,1))  # Return empty array
     # Returns reduced info
-    return(runid,subid,nhot,nlowv,nvlowv,nvvlowv,uid,nentries,nev,duplicates,nonvalidgps,datemin,datemax,gpsmin,gpsmax,duration,meansig,nlow.T[0],nhigh.T[0])
 
 def cleanStats(pdlist):
   '''
@@ -698,7 +704,7 @@ def dumpToFile(uid,fn):
 ##
 
 # When all is ready simply plot summary statistics
-#plotSumStats()
+plotSumStats()
 
 # Generic settings
 shortlab = True # Show short legends
@@ -706,7 +712,7 @@ plotgal = False # Plot galactic signal
 buildstat = True  # Do we want to build reduced run stat?
 if buildstat == True:
   list_of_lists = []
-do_all = False
+do_all = True
 new_bats = [59, 60, 70, 84]  # Units equipped with new batteries
 
 if do_all:  # Loop on all npz files... These have to be built first!
@@ -734,13 +740,13 @@ if do_all:  # Loop on all npz files... These have to be built first!
         plotHists(uid,fn) # Plot output histos
 
 else:  # Select specific runs & UIDs
-    runid = 2009  # 4 digits
+    runid = 2007  # 4 digits
     # Loop on units/runs
     #for subid in range(4,17): # 2006
     #for subid in range(2,25): # 2006
     #for subid in range(1,20): # 2007
     #for subid in range(1,9): # 2008
-    for subid in [1]:
+    for subid in [10]:
         #for uid in [58]:
         for uid in [83, 70, 58, 59, 60, 69, 84, 151]:
         #for uid in [59, 60, 70, 84]: # New batteries
