@@ -13,7 +13,8 @@ import ROOT
 import datetime
 import pandas as pd
 
-runpath = '/home/olivier/GRAND/data/GP300/argentina/auger/GRANDfiles/'
+#runpath = '/home/olivier/GRAND/data/GP300/argentina/auger/GRANDfiles/'
+runpath = '/home/olivier/GRAND/data/sim/'
 outpath = '/home/olivier/GRAND/GP300/ana/auger/Aug2023/'
 
 check = 0
@@ -55,7 +56,7 @@ def fillHists(uid,runid,subid):
     fn = runpath+"/td"+f'{runid:06}'+"_f"+f'{subid:04}'+".root"
     print(f"Reading file ",fn)
 
-    if 0:
+    if 1:
       # Print content of ROOT file
       tf = ROOT.TFile(fn)
       for key in tf.GetListOfKeys():
@@ -71,7 +72,8 @@ def fillHists(uid,runid,subid):
     except:
         print("Could not find file",fn)
         return
-    trun = df.trun
+    trawshower = df.trawefield
+    #trun = df.trun
     #print(trun)
     trawv = df.trawvoltage
     tadc = df.tadc
@@ -704,15 +706,15 @@ def dumpToFile(uid,fn):
 ##
 
 # When all is ready simply plot summary statistics
-plotSumStats()
+#plotSumStats()
 
 # Generic settings
-shortlab = True # Show short legends
+shortlab = False # Show short legends
 plotgal = False # Plot galactic signal
-buildstat = True  # Do we want to build reduced run stat?
+buildstat = False  # Do we want to build reduced run stat?
 if buildstat == True:
   list_of_lists = []
-do_all = True
+do_all = False
 new_bats = [59, 60, 70, 84]  # Units equipped with new batteries
 
 if do_all:  # Loop on all npz files... These have to be built first!
@@ -740,15 +742,15 @@ if do_all:  # Loop on all npz files... These have to be built first!
         plotHists(uid,fn) # Plot output histos
 
 else:  # Select specific runs & UIDs
-    runid = 2007  # 4 digits
+    runid = 2006  # 4 digits
     # Loop on units/runs
     #for subid in range(4,17): # 2006
     #for subid in range(2,25): # 2006
     #for subid in range(1,20): # 2007
     #for subid in range(1,9): # 2008
-    for subid in [10]:
-        #for uid in [58]:
-        for uid in [83, 70, 58, 59, 60, 69, 84, 151]:
+    for subid in [2]:
+        for uid in [83]:
+        #for uid in [83, 70, 58, 59, 60, 69, 84, 151]:
         #for uid in [59, 60, 70, 84]: # New batteries
             fn = "td"+f'{runid:06}'+"_f"+f'{subid:04}'+"_DU"+str(uid)+".npz"  # npz file name
             #if 1:

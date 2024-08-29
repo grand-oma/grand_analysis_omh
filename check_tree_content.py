@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # grandlib
-import grand.io.root_trees as rt
+import grand.dataio.root_trees as rt
 
 
 ###########################
@@ -24,7 +24,7 @@ GRANDLIB BRANCH: `dev_io_root`
 
 This script reads out a GRAND data file in ROOT format.
 It plots the GPS parameters of all events in a data file,
-where each detection unit (DU) is treated separately. 
+where each detection unit (DU) is treated separately.
 This allows us to take a quick look at the GPS data,
 particularly during on-site analyses.
 
@@ -110,7 +110,7 @@ for du in du_list:
             continue
 
         last_du_entry = entry
-        
+
 
         # trunv.adc_conversion
         # trunv.adc_enabled_channels
@@ -137,8 +137,8 @@ for du in du_list:
         # trunv.tree_name
         # trunv.trigger_position
         # trunv.type
-    
- 
+
+
     # Check TADC run parameters
     tadc.get_entry(last_du_entry)
 
@@ -204,8 +204,8 @@ for du in du_list:
     trigger_pattern_notch0_ch1          = tadc.trigger_pattern_notch0_ch1
     trigger_pattern_redch0_ch1          = tadc.trigger_pattern_redch0_ch1
     trigger_position                    = tadc.trigger_position
-    
-    
+
+
 
     #trunv.di
 
@@ -223,7 +223,7 @@ for du in du_list:
 
     msg += 'RUN NUMBER\n\n'
     msg += 'run_number:                          {:}\n'.format(run_number)
-    
+
     msg += '\n\nDIGITIZER MODE PARAMETERS\n'
     msg += '\n--Digitizer Control--\n'
     msg += 'enable_1PPS:                         {:}\n'.format(enable_1PPS)
@@ -231,7 +231,7 @@ for du in du_list:
     msg += 'enable_DAQ:                          {:}\n'.format(enable_DAQ)
     msg += 'enable_filter_ch:                    {:}\n'.format(enable_filter_ch)
     msg += 'force_firmware_reset:                {:}\n'.format(force_firmware_reset)
-    
+
     msg += '\n--Trigger Enable Mask--\n'
     msg += 'enable_trigger_10s:                  {:}\n'.format(enable_trigger_10s)
     msg += 'enable_trigger_calibration:          {:}\n'.format(enable_trigger_calibration)
@@ -245,7 +245,7 @@ for du in du_list:
     msg += '\n--Test Pulse Rate Divider & Channel Readout Enable--\n'
     msg += 'enable_readout_ch:                   {:}\n'.format(enable_readout_ch)
     msg += 'test_pulse_rate_divider:             {:}\n'.format(test_pulse_rate_divider)
-    
+
     msg += '\n--Input Selector for Readout Channel--\n'
     msg += 'selector_readout_ch:                 {:}\n'.format(selector_readout_ch)
 
@@ -288,19 +288,19 @@ for du in du_list:
     msg += 'adc_samples_count_ch:                {:}\n'.format(adc_samples_count_ch)
     msg += 'adc_sampling_frequency:              {:} MHz\n'.format(adc_sampling_frequency)
     msg += 'adc_sampling_resolution:             {:} LSB\n'.format(adc_sampling_resolution)
- 
 
-    
+
+
     msg += 'fire_single_test_pulse:              {:}\n'.format(fire_single_test_pulse)
     msg += 'firmware_version:                    {:}\n'.format(firmware_version)
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     msg += 'trigger_position:                    {:}\n'.format(trigger_position)
     msg += 'trigger_pattern_10s:                 {:}\n'.format(trigger_pattern_10s)
     msg += 'trigger_pattern_calibration:         {:}\n'.format(trigger_pattern_calibration)
@@ -341,8 +341,8 @@ for entry in range(n_entries_file):
     #     msg  = 'WARNING: TADC `first_du` not same for all events in file\n'
     #     msg += 'Entry 0: {}'.format(first_du)
     #     msg += 'Entry {}: {}'.format(entry,tadc.first_du)
-    #     print(msg)          
-    
+    #     print(msg)
+
     # Get the battery voltages
     battery_level.append(trawv.battery_level)
 
