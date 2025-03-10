@@ -8,7 +8,7 @@ f = sys.argv[1]
 #df = rt.DataFile(f)
 #df.print()
 rootdir = "/home/olivier/GRAND/data/GP300/GRANDFiles/"
-rootdir = "/home/olivier/GRAND/data/GP300/GP13/onsite/"
+rootdir = "/home/olivier/GRAND/data/GP300/GP13/onsite/sept2024/"
 f = rootdir+f
 print(f"Reading file ",f)
 

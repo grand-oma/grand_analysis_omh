@@ -16,14 +16,16 @@ sig_t = 15 # Timing resolution (ns)
 ################################################################################
 
 ##Read files
-recons_path = "/home/olivier/GRAND/GP300/ana/GP13/may2024/new_recons/"
+#recons_path = "/home/olivier/GRAND/GP300/ana/GP13/may2024/new_recons/"
 #recons_path = "C:/Users/martinea/Documents/GRAND/GP300/ana/GP13/may2024/" 
+recons_path = "/home/olivier/GRAND/data/GP300/gp13/onsite/sept2024/0914_40Hz_75MHz_Beacon_ON_NotchFilter132/"
 
 idant, xant, yant, zant = np.loadtxt(recons_path+"coord_antennas.txt").T
 _, _, theta_rec, _, phi_rec, _, chi2_plane, _ = np.loadtxt(recons_path+"Rec_plane_wave_recons.txt").T
 recoinc, nant, chi2_sphere, _, xrec, yrec, zrec, trec, rho, ground_alt = np.loadtxt(recons_path+"Rec_sphere_wave_recons.txt").T
 ind, coincid, peakt, peaka = np.loadtxt(recons_path+"Rec_coinctable.txt").T
-antid = np.loadtxt(recons_path+"DU_id.txt").T
+antid = np.loadtxt(recons_path+"DU_id.txt",usecols=1).T  # Modified DU_id.txt format for Xishui analysis
+
 
 xdaqm, ydaqm, zdaqm = 406, 456, 1220  # DAQ position
 xdaq, ydaq, zdaq = 490, 501, 1320  # DAQ position
@@ -59,7 +61,8 @@ for icoinc in np.unique(recoinc[sel]):
 
 ################################################################################
 ##Plots
-plot_folder = './GP13_plots/'
+#plot_folder = './GP13_plots/'
+plot_folder = recons_path
 if not os.path.exists(plot_folder): os.makedirs(plot_folder)
 
 

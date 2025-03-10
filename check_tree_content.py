@@ -1,3 +1,4 @@
+# Pablo's (very detailed) script
 # system
 import os
 import argparse
@@ -50,7 +51,8 @@ parser = argparse.ArgumentParser(description="Plot GPS parameters of ADC traces 
 
 parser.add_argument('--path',
                     dest='path_to_data_file',
-                    default='/sps/grand/data/nancay/may2023/ROOTfiles/md000400_f0001.root',
+                    #default='/sps/grand/data/nancay/may2023/ROOTfiles/md000400_f0001.root',
+                    default='/home/olivier/GRAND/data/GP300/GP13/onsite/sept2024/',
                     type=str,
                     help='Specifies the path of the ROOT data file containing the\
                           traces to plot.')
